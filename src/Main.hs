@@ -1,96 +1,49 @@
 module Main where
 import Types
 import Utils
+import Child
+import Robot
+import Data.Set as Set
 import Debug.Trace
 import System.Random
-
-
+   
+  
 main = do
-    let env = init_enviroment 6 6 7 3
-    let env1 = simulate_turn env
-    print(env1)
+    let env = trace "Initial enviroment" (printEnviroment (initEnviroment 6 6 30 3))
+    let env1 = simulateTurn env
+    let isClean = houseIsClean env1
+    if isClean
+        then print("The simulation finished and the house is clean")
+    else print("The simulation finished and the house is not clean")
 
 
-temp :: Enviroment -> Enviroment
-temp env = env
+naturalChange :: Enviroment -> Enviroment
+naturalChange env = robotsTurn env (robots env)
 
 
-child_action :: Enviroment -> Agent -> Enviroment
-child_action env agent = 
-    traceShow (agent) (temp env)
+randomChange :: Enviroment -> Enviroment
+randomChange env = childrenTurn env (children env) 
 
-children_turn :: Enviroment -> [Agent]-> Enviroment
-children_turn env [] = env
-children_turn env (c:cs) = 
-    let env1 = child_action env c
-    in children_turn env1 cs  
-
-
-robot_action :: Enviroment -> Agent -> Enviroment
-robot_action env agent = 
-    traceShow (agent) (temp env)
-
-robots_turn :: Enviroment -> [Agent]-> Enviroment
-robots_turn env [] = env
-robots_turn env (r:rs) = 
-    let env1 = robot_action env r
-    in robots_turn env1 rs  
-
-
-natural_change :: Enviroment -> Enviroment
-natural_change env =
-    let env1 = robots_turn env (robots env)
-    in let env2 = children_turn env1 (children env1) in env2
-
-
-random_change :: Enviroment -> Enviroment
-random_change env = env
-
-
-init_enviroment :: Int -> Int -> Int -> Int -> Enviroment
-init_enviroment n_rows n_columns final_time random_time = 
-    let obstacles = [Agent {row = 4, column = 0}]
-        dirt = [Agent {row = 2, column = 1}]
-        corral = [Agent {row = 0, column = 4}, Agent {row = 0, column = 5}]
-        children = [Agent {row = 0, column = 0}, Agent {row = 4, column = 3}]
-        robots = [Agent {row = 1, column = 3}]        
-    in Enviroment {
-        n_rows = n_rows, 
-        n_columns = n_columns, 
-        current_time = 0,
-        final_time = final_time,
-        random_time = random_time,
-        obstacles = obstacles,
-        dirt = dirt,
-        corral = corral,
-        children = children,
-        robots = robots }
-
-
-sum_currente_time :: Enviroment -> Enviroment
-sum_currente_time env =
-    Enviroment {
-        n_rows = (n_rows env), 
-        n_columns = (n_columns env), 
-        current_time = (current_time env) + 1,
-        final_time = (final_time env),
-        random_time = (random_time env),
-        obstacles = (obstacles env),
-        dirt = (dirt env),
-        corral = (corral env),
-        children = (children env),
-        robots = (robots env) }
-
-
-simulate_turn :: Enviroment -> Enviroment
-simulate_turn env =
-    if (current_time env) == (final_time env) 
+ 
+simulateTurn :: Enviroment -> Enviroment
+simulateTurn env =
+    if (currentTime env) == (finalTime env) 
         then env
-    else
-        let env1 = sum_currente_time env
-            env2 = natural_change env1
-        in  if ((current_time env1) `mod` (random_time env1)) == 0
-                then let env3 = random_change env2 in simulate_turn (print_enviroment env3)
+    else  
+        let env1 = printCurrentTime (updateCurrentTime env)
+            env2 = naturalChange env1
+        in  
+            if ((currentTime env1) `mod` (randomTime env1)) == 0
+                then 
+                    let env3 = randomChange env2 
+                    in simulateTurn (printEnviroment env3)
             else
-                simulate_turn (print_enviroment env2)
+                simulateTurn (printEnviroment env2)
+   
 
+houseIsClean :: Enviroment -> Bool
+houseIsClean env = 
+    let squares = (obstacles env) ++ (dirt env) ++ (corral env) ++ (children env) ++ (robots env)
+        setSquares = Set.fromList squares
+        cleanSquares = ((nRows env) * (nColumns env)) - (length setSquares) 
+    in fromIntegral cleanSquares >=  0.6 * fromIntegral (nRows env) * fromIntegral (nColumns env)
