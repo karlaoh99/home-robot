@@ -75,18 +75,10 @@ goToMostCloseDirt env square =
     in 
         if pos1 /= Square {row = -1, column = -1} || pos2 /= Square {row = -1, column = -1}
             then 
-                if not (isACorral env square) && isAChild env square
-                    then
-                        if pos1 /= Square {row = -1, column = -1}
-                            then trace ("Robot moved child from " ++ show square ++ " to " ++ show pos1) (moveRobotAndChild env square pos1)
-                        else 
-                            trace ("Robot moved child from " ++ show square ++ " to " ++ show pos2) (moveRobotAndChild env square pos2)
-      
-                else if pos2 /= Square {row = -1, column = -1}
+                if pos2 /= Square {row = -1, column = -1}
                     then trace ("Robot moved from " ++ show square ++ " to " ++ show pos2) (moveRobot env square pos2)
                 else 
                     trace ("Robot moved from " ++ show square ++ " to " ++ show pos1) (moveRobot env square pos1)
-        
         else
             let (s, pos) = getRandomElements (getValidRobotPositions env square) 1 (stdGen env)
                 env1 = updateStdGen env s

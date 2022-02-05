@@ -1,5 +1,6 @@
 module Types where 
 import System.Random
+import Input
 
 
 data Square = Square {
@@ -23,28 +24,26 @@ data Enviroment = Enviroment {
 } deriving (Show)  
 
 
--- TODO Init variables
 -- Init the enviroment
-initEnviroment :: Int -> Int -> Int -> Int -> Enviroment
-initEnviroment nRows nColumns finalTime randomTime = 
-    let obstacles = [Square {row = 3, column = 1}, Square {row = 3, column = 2}]
-        dirt = [Square {row = 2, column = 1},  Square {row = 3, column = 4}]
-        corral = [Square {row = 0, column = 4}, Square {row = 0, column = 5}]
-        children = [Square {row = 0, column = 0}, Square {row = 5, column = 5}]
-        robots = [Square {row = 1, column = 3}, Square {row = 0, column = 1}]  
-        stdGen = mkStdGen 42      
+initEnviroment :: Enviroment
+initEnviroment = 
+    let (nRows, nColumns, finalTime, randomTime, rndSeed, obstacles, dirt, corral, children, robots) = initEnviromentVariables
+        stdGen = mkStdGen rndSeed
     in Enviroment {
         nRows = nRows, 
         nColumns = nColumns, 
         currentTime = 0,
         finalTime = finalTime,
         randomTime = randomTime,
-        obstacles = obstacles,
-        dirt = dirt,
-        corral = corral,
-        children = children,
-        robots = robots, 
+        obstacles = map convertToSquare obstacles,
+        dirt = map convertToSquare dirt,
+        corral = map convertToSquare corral,
+        children = map convertToSquare children,
+        robots = map convertToSquare robots, 
         stdGen = stdGen }
+
+convertToSquare :: (Int, Int) -> Square
+convertToSquare element = Square {row = (fst element), column = (snd element)}
 
 
 -- Functions to edit the enviroment

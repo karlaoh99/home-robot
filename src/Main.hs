@@ -9,7 +9,7 @@ import System.Random
    
   
 main = do
-    let env = trace "Initial enviroment" (printEnviroment (initEnviroment 6 6 30 3))
+    let env = trace "Initial enviroment" (printEnviroment initEnviroment)
     let env1 = simulateTurn env
     let isClean = houseIsClean env1
     if isClean

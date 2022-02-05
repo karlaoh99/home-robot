@@ -17,7 +17,7 @@ cabal-version:       >=1.10
 
 executable HomeRobot
   main-is:             Main.hs
-  other-modules: Types Utils Child Robot    
+  other-modules: Input Types Utils Child Robot    
   -- other-extensions:
   build-depends:       base >=4.12 && <4.13,
                        random >= 1.1,
